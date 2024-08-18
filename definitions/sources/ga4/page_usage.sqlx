@@ -1,0 +1,22 @@
+config {
+    type : "table",
+    schema : "dataform_sources",
+}
+
+WITH prep as (
+SELECT
+    *
+FROM
+    ${ref('page_views')}
+)
+
+SELECT
+    page_title,
+    count(*) as total_page_views,
+    count(distinct concat(user_pseudo_id, ga_session_id)) as unique_sessions
+FROM
+    prep
+GROUP BY
+    page_title
+ORDER BY
+    total_page_views desc
