@@ -1,0 +1,25 @@
+config {
+    type : "table",
+    schema : "dataform_sources",
+}
+
+with prep as (
+    select
+        user_pseudo_id,
+        ga_session_id,
+        first_value(page_title) over (partition by user_pseudo_id, ga_session_id order by event_timestamp desc) as exit_page
+    from
+        ${ref('page_views')}
+    order by
+        event_timestamp
+)
+
+select
+    exit_page,
+    count(distinct concat(user_pseudo_id, ga_session_id)) as exits
+from
+    prep
+group by
+    exit_page
+order by
+    exits desc
