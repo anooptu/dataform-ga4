@@ -1,0 +1,16 @@
+config {
+    type : "table",
+    schema : "dataform_sources",
+}
+
+SELECT
+    CASE WHEN entrances = 1 THEN page_title ELSE null END AS landing_page,
+    count(distinct concat(user_pseudo_id, ga_session_id)) AS entrances
+FROM
+    ${ref('page_views')}
+GROUP BY
+    landing_page
+HAVING 
+    landing_page is not null
+ORDER BY 
+    entrances desc
