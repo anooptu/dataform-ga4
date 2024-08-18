@@ -1,0 +1,29 @@
+config {
+    type : "table",
+    schema : "dataform_sources"
+}
+
+with prep as(
+    select
+        user_pseudo_id,
+        ga_session_id,
+        page_title,
+        event_timestamp
+    from
+        ${ref('page_views')}
+    where
+        user_pseudo_id = "97231930.4100323446"
+    order by
+        event_timestamp
+)
+
+select
+    user_pseudo_id,
+    ga_session_id,
+    lag(page_title, 1) over(partition by user_pseudo_id, ga_session_id order by event_timestamp asc) as prev_page,
+    page_title,
+    lead(page_title, 1) over(partition by user_pseudo_id, ga_session_id order by event_timestamp asc) as next_page
+from
+    prep
+order by
+    event_timestamp
